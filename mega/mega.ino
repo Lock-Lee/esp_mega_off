@@ -55,7 +55,7 @@ float PHstop;
 
 int Sw_togleph1, Sw_togleph2;
 int Sw_togle1, Sw_togle2 ;
-int Sw_auto;
+int Sw_auto, Sw_mode;
 int t1 = 0;
 
 int pump1 = 14;
@@ -240,9 +240,12 @@ void loop()
       SoilStartINT = part1.toInt();
       SoilENDINT =  part2.toInt();
 
-    }else if (!received.indexOf("readvalue")) {
+    } else if (!received.indexOf("readvalue")) {
+      readValue();
 
-      
+    } else if (!received.indexOf("swauto=")) {
+      String str = received.substring(7);
+      Sw_mode = str.toInt();
     }
 
 
@@ -397,34 +400,34 @@ void Set_PH()
 
   }
 }
- void readValue(){
-   mySerial.println((String) "auto="+timeStartAuto.hour+":"+timeStartAuto.min+","+timeEndAuto.hour+":"+timeEndAuto.min+");
-   delay(200);
-   mySerial.println((String) "time="+timeStart1.hour+":"+timeStart1.min+","+timeEnd1.hour+":"+timeEnd1.min+","+timeStart2.hour+":"+timeStart2.min+","+timeEnd2.hour+":"+timeEnd2.min);
-   delay(200);
-   mySerial.println((String) "timeph="+timePHStart1.hour+":"+timePHStart1.min+","+timePHEnd1.hour+":"+timePHEnd1.min+","+timePHStart2.hour+":"+timePHStart2.min+","+timePHEnd2.hour+":"+timePHEnd2.min);
-   delay(200);
-   mySerial.println((String) "setph="+PHstart+","+PHstop);
-   delay(200);
-   mySerial.println((String) "settemp="+SoilStartINT+","+SoilENDINT);
-   delay(200);
-    
- }
-String splitOfstrng(String data, char separator, int index)
-{
-  int found = 0;
-  int strIndex[] = {0, -1};
-  int maxIndex = data.length() - 1;
+void readValue() {
+  mySerial.println((String) "auto=" + timeStartAuto.hour + ":" + timeStartAuto.min + "," + timeEndAuto.hour + ":" + timeEndAuto.min );
+                   delay(200);
+                   mySerial.println((String) "time = "+timeStart1.hour+": "+timeStart1.min+", "+timeEnd1.hour+": "+timeEnd1.min+", "+timeStart2.hour+": "+timeStart2.min+", "+timeEnd2.hour+": "+timeEnd2.min);
+                   delay(200);
+                   mySerial.println((String) "timeph = "+timePHStart1.hour+": "+timePHStart1.min+", "+timePHEnd1.hour+": "+timePHEnd1.min+", "+timePHStart2.hour+": "+timePHStart2.min+", "+timePHEnd2.hour+": "+timePHEnd2.min);
+                   delay(200);
+                   mySerial.println((String) "setph = "+PHstart+", "+PHstop);
+                   delay(200);
+                   mySerial.println((String) "settemp = "+SoilStartINT+", "+SoilENDINT);
+                   delay(200);
 
-  for (int i = 0; i <= maxIndex && found <= index; i++)
-  {
-    if (data.charAt(i) == separator || i == maxIndex)
-    {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
-    }
-  }
+                 }
+                   String splitOfstrng(String data, char separator, int index)
+                   {
+                   int found = 0;
+                   int strIndex[] = {0, -1};
+                   int maxIndex = data.length() - 1;
 
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
+                   for (int i = 0; i <= maxIndex && found <= index; i++)
+                   {
+                   if (data.charAt(i) == separator || i == maxIndex)
+                   {
+                   found++;
+                   strIndex[0] = strIndex[1] + 1;
+                   strIndex[1] = (i == maxIndex) ? i + 1 : i;
+                 }
+                 }
+
+                   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+                 }

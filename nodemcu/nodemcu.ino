@@ -71,8 +71,13 @@ void onMsghandler(char *topic, uint8_t *msg, unsigned int msglen)
     mySerial.println((String) "settemp=" + message);
   }
   else if (top == "/NUTTACIT/ionic/read_data") {
+  mySerial.println((String) "readvalue" + message);
+   microgear.publish("/esp/write_data",  timeauto + "," + timewater + "," + timeph + "," + setph + "," + settemp );
+   
+  }
+   else if (top == "/NUTTACIT/ionic/swauto") {
 
-    microgear.publish("/esp/write_data",  timeauto + "," + timewater + "," + timeph + "," + setph + "," + settemp );
+    mySerial.println((String) "swauto=" + message);
   }
 
 }

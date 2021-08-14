@@ -210,105 +210,145 @@ void readKeypad()
     read_time();
     show_time();
 
+    if (Sw_mode == 1) {
+      if (Sw_togle1 == 1) {
+        if (realTime.hour == timeEnd1.hour && realTime.min == timeEnd1.min)
+        {
+          stateTime1 = 0;
+          water_state = 0;
+          Serial.println("stop 1");
+          digitalWrite(pump1, LOW);
+          mySerial.println((String) "pump1=0");
+        }
+        else if (realTime.hour == timeStart1.hour && realTime.min == timeStart1.min)
+        {
+          stateTime1 = 1;
+          water_state = 1;
+          Serial.println("start 1");
+          digitalWrite(pump1, HIGH);
+          mySerial.println((String) "pump1=1");
+
+        }
+      } else {
+        digitalWrite(pump1, LOW);
+        mySerial.println((String) "pump1=0");
+      }
+
+      if (Sw_togle2 == 1) {
+        if (realTime.hour == timeEnd2.hour && realTime.min == timeEnd2.min)
+        {
+          stateTime2 = 0;
+          water_state = 0;
+          Serial.println("stop 2");
+          digitalWrite(pump1, LOW);
+          mySerial.println((String) "pump2=0");
+
+        }
+        else if (realTime.hour == timeStart2.hour && realTime.min == timeStart2.min)
+        {
+          stateTime2 = 1;
+          water_state = 1;
+          Serial.println("start 2");
+          digitalWrite(pump1, HIGH);
+          mySerial.println((String) "pump2=1");
+
+        }
+      } else {
+        Serial.println("stop 2");
+        digitalWrite(pump1, LOW);
+        mySerial.println((String) "pump2=0");
+      }
 
 
-    if (realTime.hour == timeEnd1.hour && realTime.min == timeEnd1.min)
-    {
-      stateTime1 = 0;
-      water_state = 0;
-      Serial.println("stop 1");
-      digitalWrite(pump1, LOW);
-      mySerial.println((String) "pump1=0");
+
+      if (Sw_togleph1 == 1) {
+        if (realTime.hour == timePHEnd1.hour && realTime.min == timePHEnd1.min)
+        {
+          stateph1 = 0;
+          Serial.println("stop PH 1");
+          digitalWrite(pump3, LOW);
+          digitalWrite(pump4, LOW);
+          mySerial.println((String) "pump3=0");
+          mySerial.println((String) "pump4=0");
+        }
+        else if (realTime.hour == timePHStart1.hour && realTime.min == timePHStart1.min)
+        {
+          stateph1 = 1;
+          Serial.println("start PH 1");
+          digitalWrite(pump3, HIGH);
+          digitalWrite(pump4, HIGH);
+          mySerial.println((String) "pump3=1");
+          mySerial.println((String) "pump4=1");
+        }
+      } else {
+        digitalWrite(pump3, LOW);
+        digitalWrite(pump4, LOW);
+        mySerial.println((String) "pump3=0");
+        mySerial.println((String) "pump4=0");
+      }
+
+
+      if (Sw_togleph2 == 1) {
+        if (realTime.hour == timePHEnd2.hour && realTime.min == timePHEnd2.min)
+        {
+          stateph2 = 0;
+          Serial.println("stop PH 2");
+          digitalWrite(pump3, LOW);
+          digitalWrite(pump4, LOW);
+          mySerial.println((String) "pump3=0");
+          mySerial.println((String) "pump4=0");
+        }
+        else if (realTime.hour == timePHStart2.hour && realTime.min == timePHStart2.min)
+        {
+          stateph2 = 1;
+          Serial.println("start PH 2");
+          digitalWrite(pump3, HIGH);
+          digitalWrite(pump4, HIGH);
+          mySerial.println((String) "pump3=1");
+          mySerial.println((String) "pump4=1");
+        }
+      } else {
+        digitalWrite(pump3, LOW);
+        digitalWrite(pump4, LOW);
+        mySerial.println((String) "pump3=0");
+        mySerial.println((String) "pump4=0");
+      }
+    } else {
+      if (Sw_auto == 1) {
+        if (realTime.hour == timeEndAuto.hour && realTime.min == timeEndAuto.min)
+        {
+          Serial.println("timeEndAuto");
+          digitalWrite(pump2, 0);
+          digitalWrite(pump3, 0);
+          digitalWrite(pump4, 0);
+          digitalWrite(pump1, 0);
+          mySerial.println((String) "pump1=0");
+          mySerial.println((String) "pump2=0");
+          mySerial.println((String) "pump3=0");
+          mySerial.println((String) "pump4=0");
+        }
+        else if (realTime.hour == timeStartAuto.hour && realTime.min == timeStartAuto.min)
+        {
+          Serial.println("timeStartAuto");
+          Set_Moisture();
+          Set_PH();
+
+        }
+      } else {
+        digitalWrite(pump2, 0);
+        digitalWrite(pump3, 0);
+        digitalWrite(pump4, 0);
+        digitalWrite(pump1, 0);
+        mySerial.println((String) "pump1=0");
+        mySerial.println((String) "pump2=0");
+        mySerial.println((String) "pump3=0");
+        mySerial.println((String) "pump4=0");
+      }
+
     }
-    else if (realTime.hour == timeStart1.hour && realTime.min == timeStart1.min)
-    {
-      stateTime1 = 1;
-      water_state = 1;
-      Serial.println("start 1");
-      digitalWrite(pump1, HIGH);
-      mySerial.println((String) "pump1=1");
-
-    }
-
-    if (realTime.hour == timeEnd2.hour && realTime.min == timeEnd2.min)
-    {
-      stateTime2 = 0;
-      water_state = 0;
-      Serial.println("stop 2");
-      digitalWrite(pump1, LOW);
-      mySerial.println((String) "pump2=0");
-
-    }
-    else if (realTime.hour == timeStart2.hour && realTime.min == timeStart2.min)
-    {
-      stateTime2 = 1;
-      water_state = 1;
-      Serial.println("start 2");
-      digitalWrite(pump1, HIGH);
-      mySerial.println((String) "pump2=1");
-
-    }
 
 
 
-    if (realTime.hour == timePHEnd1.hour && realTime.min == timePHEnd1.min)
-    {
-      stateph1 = 0;
-      Serial.println("stop PH 1");
-      digitalWrite(pump3, LOW);
-      digitalWrite(pump4, LOW);
-      mySerial.println((String) "pump3=0");
-      mySerial.println((String) "pump4=0");
-    }
-    else if (realTime.hour == timePHStart1.hour && realTime.min == timePHStart1.min)
-    {
-      stateph1 = 1;
-      Serial.println("start PH 1");
-      digitalWrite(pump3, HIGH);
-      digitalWrite(pump4, HIGH);
-      mySerial.println((String) "pump3=1");
-      mySerial.println((String) "pump4=1");
-    }
-
-
-    if (realTime.hour == timePHEnd2.hour && realTime.min == timePHEnd2.min)
-    {
-      stateph2 = 0;
-      Serial.println("stop PH 2");
-      digitalWrite(pump3, LOW);
-      digitalWrite(pump4, LOW);
-      mySerial.println((String) "pump3=0");
-      mySerial.println((String) "pump4=0");
-    }
-    else if (realTime.hour == timePHStart2.hour && realTime.min == timePHStart2.min)
-    {
-      stateph2 = 1;
-      Serial.println("start PH 2");
-      digitalWrite(pump3, HIGH);
-      digitalWrite(pump4, HIGH);
-      mySerial.println((String) "pump3=1");
-      mySerial.println((String) "pump4=1");
-    }
-
-    if (realTime.hour == timeEndAuto.hour && realTime.min == timeEndAuto.min)
-    {
-      Serial.println("timeEndAuto");
-      digitalWrite(pump2, 0);
-      digitalWrite(pump3, 0);
-      digitalWrite(pump4, 0);
-      digitalWrite(pump1, 0);
-      mySerial.println((String) "pump1=0");
-      mySerial.println((String) "pump2=0");
-      mySerial.println((String) "pump3=0");
-      mySerial.println((String) "pump4=0");
-    }
-    else if (realTime.hour == timeStartAuto.hour && realTime.min == timeStartAuto.min)
-    {
-      Serial.println("timeStartAuto");
-      Set_Moisture();
-      Set_PH();
-
-    }
 
 
 
