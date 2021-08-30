@@ -28,16 +28,20 @@ String timeEnd2 = "";
 String timeEnd3 = "";
 
 float PhWrite;
-int humiWrite;
+int Moisture;
 
 String timeauto = "";
-String timewater = "";
-String timeph = "";
+String timewater1 = "";
+String timewater2 = "";
+
+String timeph1 = "";
+String timeph2 = "";
+
 String setph = "";
 String settemp = "";
+String pump;
 int timer = 0;
 MicroGear microgear(client);
-String pump1, pump2, pump3, pump4;
 
 void onMsghandler(char *topic, uint8_t *msg, unsigned int msglen)
 {
@@ -45,41 +49,61 @@ void onMsghandler(char *topic, uint8_t *msg, unsigned int msglen)
   msg[msglen] = '\0';
   String message = (String)(char *)msg;
   // ---------------------------------------------------------- //
-  Serial.print(top);
-  Serial.print(" --> ");
-  Serial.println(message);
+  // Serial.print(top);
+  // Serial.print(" --> ");
+  // Serial.println(message);
 
-  if (top == "/NUTTACIT/ionic/time1") {
+  if (top == "/NUTTACIT/ionic/time1")
+  {
     mySerial.println((String) "time1=" + message);
   }
-  else if (top == "/NUTTACIT/ionic/time2") {
+  else if (top == "/NUTTACIT/ionic/time2")
+  {
     mySerial.println((String) "time2=" + message);
   }
-  else if (top == "/NUTTACIT/ionic/timeph1") {
+  else if (top == "/NUTTACIT/ionic/timeph1")
+  {
     mySerial.println((String) "timeph1=" + message);
   }
-  else if (top == "/NUTTACIT/ionic/timeph2") {
+  else if (top == "/NUTTACIT/ionic/timeph2")
+  {
     mySerial.println((String) "timeph2=" + message);
   }
-  else if (top == "/NUTTACIT/ionic/timeauto") {
+  else if (top == "/NUTTACIT/ionic/timeauto")
+  {
     mySerial.println((String) "timeauto=" + message);
   }
-  else if (top == "/NUTTACIT/ionic/setph") {
+  else if (top == "/NUTTACIT/ionic/setph")
+  {
     mySerial.println((String) "setph=" + message);
   }
-  else if (top == "/NUTTACIT/ionic/settemp") {
+  else if (top == "/NUTTACIT/ionic/settemp")
+  {
     mySerial.println((String) "settemp=" + message);
   }
-  else if (top == "/NUTTACIT/ionic/read_data") {
-  mySerial.println((String) "readvalue" + message);
-   microgear.publish("/esp/write_data",  timeauto + "," + timewater + "," + timeph + "," + setph + "," + settemp );
-   
+  else if (top == "/NUTTACIT/ionic/read_data")
+  {
+
+    microgear.publish("/esp/write_val", String(settemp) + "," + setph);
+
+    microgear.publish("/esp/write_timeph", String(timeph1) + "," + timeph2);
+
+    microgear.publish("/esp/write_time", String(timewater1) + "," + timewater2);
+
+    microgear.publish("/esp/write_auto", String(timeauto));
   }
-   else if (top == "/NUTTACIT/ionic/swauto") {
+  else if (top == "/NUTTACIT/ionic/read_pump")
+  {
+
+    microgear.publish("/esp/th", "" + String(PhWrite) + "," + Moisture);
+    delay(200);
+    microgear.publish("/esp/th/pump", (String)pump);
+  }
+  else if (top == "/NUTTACIT/ionic/swauto")
+  {
 
     mySerial.println((String) "swauto=" + message);
   }
-
 }
 
 void onConnected(char *attribute, uint8_t *msg, unsigned int msglen)
@@ -113,8 +137,6 @@ void setup()
     microgear.connect(APPID);
   }
 
-  pinMode(D5, INPUT_PULLUP);
-
   Serial.println("Starting...");
 }
 
@@ -127,11 +149,12 @@ void loop()
     //Serial.println(received);
 
     String received1 = received;
-    //Serial.println(received1);
+
+    Serial.println(received1);
     if (!received1.indexOf("Moisture="))
     {
 
-      humiWrite = received1.substring(9).toInt();
+      Moisture = received1.substring(9).toInt();
     }
     else if (!received1.indexOf("PH="))
     {
@@ -144,57 +167,56 @@ void loop()
       wm.resetSettings();
       ESP.restart();
     }
-    else if (!received1.indexOf("pump1="))
+    else if (!received1.indexOf("pump="))
     {
-      String str = received1.substring(6);
-      pump1 = str;
+      String str = received1.substring(5);
+      pump = str;
     }
-    else if (!received1.indexOf("pump2="))
+
+    else if (!received1.indexOf("timeauto="))
+
     {
-      String str = received1.substring(6);
-      pump2 = str;
-    }
-    else if (!received1.indexOf("pump3="))
-    {
-      String str = received1.substring(6);
-      pump3 = str;
-    }
-    else if (!received1.indexOf("pump4="))
-    {
-      String str = received1.substring(6);
-      pump4 = str;
-    }
-    else if (!received1.indexOf("auto="))
-    {
-      String str = received1.substring(6);
+      String str = received1.substring(9);
       timeauto = str;
     }
-    else if (!received1.indexOf("time="))
+    else if (!received1.indexOf("tw1="))
     {
-      String str = received1.substring(6);
-      timewater = str;
+      String str = received1.substring(4);
+      timewater1 = str;
     }
-    else if (!received1.indexOf("timeph="))
+    else if (!received1.indexOf("tw2="))
     {
-      String str = received1.substring(6);
-      timeph = str;
+      String str = received1.substring(4);
+      timewater2 = str;
     }
-    else if (!received1.indexOf("setph="))
+    else if (!received1.indexOf("tph1="))
+    {
+      String str = received1.substring(5);
+      timeph1 = str;
+    }
+    else if (!received1.indexOf("tph2="))
+    {
+      String str = received1.substring(5);
+      timeph2 = str;
+
+      Serial.println(timeph2);
+    }
+
+    else if (!received1.indexOf("tempset="))
+    {
+      String str = received1.substring(8);
+      settemp = str;
+    }
+    else if (!received1.indexOf("phset="))
     {
       String str = received1.substring(6);
       setph = str;
     }
-    else if (!received1.indexOf("settemp="))
+    else if (!received1.indexOf("timeauto="))
     {
-      String str = received1.substring(6);
-      settemp = str;
+      String str = received1.substring(9);
+      timeauto = str;
     }
-
-
-
-
-
-
   }
 
   if (microgear.connected())
@@ -202,17 +224,15 @@ void loop()
     microgear.loop();
     if (timer >= 2500)
     {
-      microgear.publish("/esp/th", "" + String(PhWrite) + "," + humiWrite);
-      delay(200);
-      microgear.publish("/esp/th/pump", (String)pump1 + "," + pump2 + "," + pump3 + "," + pump4); delay(200);
-
     }
     else
+    {
       timer += 100;
+    }
   }
   else
   {
-    if (timer >= 5000)
+    if (timer >= 10000)
     {
       microgear.connect(APPID);
       timer = 0;

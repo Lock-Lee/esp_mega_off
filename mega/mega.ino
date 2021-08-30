@@ -9,7 +9,11 @@ int x = 0;
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 20, 4); //ถ้าจอไม่แสดงผลให้เปลี่ยน 0x27 เป็น0x3F
 int read_num(int nmax, int x, int y);
-
+unsigned long previousMillis = 0;
+unsigned long previousMillis1 = 0;
+unsigned long previousMillis2 = 0;
+unsigned long previousMillis3 = 0;
+unsigned long previousMillis4 = 0;
 bool stateph1 = 0;
 bool stateph2 = 0;
 bool stateph3 = 0;
@@ -31,7 +35,7 @@ void read_time();
 void readKeypad();
 char key;
 int address = 0;
-
+int target = 0;
 bool stateph = false;
 int starttimeph_m;
 int starttimeph_h;
@@ -39,12 +43,12 @@ int starttimeph_h;
 int Moisture;
 int SoilStartINT = 0;
 int SoilENDINT = 0;
-int xx1, xx2;
 
 float PH;
 
 int water_state = 0, ph_state = 0;
 
+int status_auto = 0;
 int PHStartInt;
 int PHStartfloat;
 int PHEndInt;
@@ -54,7 +58,7 @@ float PHstart;
 float PHstop;
 
 int Sw_togleph1, Sw_togleph2;
-int Sw_togle1, Sw_togle2 ;
+int Sw_togle1, Sw_togle2;
 int Sw_auto, Sw_mode;
 int t1 = 0;
 
@@ -63,6 +67,10 @@ int pump2 = 15;
 int pump3 = 16;
 int pump4 = 17;
 
+int pump1_status = 0;
+int pump2_status = 0;
+int pump3_status = 0;
+int pump4_status = 0;
 //เซ็นเซอร์วัดความชื้นในดิน Soil Moisture Sensor
 int MoistureSensor = A1;
 
@@ -81,17 +89,13 @@ TIMER timeEnd1;
 TIMER timeStart2;
 TIMER timeEnd2;
 
-
 TIMER timeStartAuto;
 TIMER timeEndAuto;
-
 
 TIMER timePHStart1;
 TIMER timePHEnd1;
 TIMER timePHStart2;
 TIMER timePHEnd2;
-
-
 
 //ทำ map ให้เป็นจุดทศนิยม
 double mapf(double val, double in_min, double in_max, double out_min, double out_max)
@@ -110,12 +114,15 @@ void setTime()
 }
 void show_time(void)
 {
-
+  lcd.setCursor(6, 0);
+  lcd.print("              ");
+  lcd.setCursor(6, 0);
   lcd.print(realTime.hour);
   lcd.print(":");
   lcd.print(realTime.min);
   lcd.print(":");
   lcd.print(realTime.sec);
+
   //  Serial.print(RealTime.hour);
   //  Serial.print(RealTime.min);
   //  Serial.println(RealTime.sec);
@@ -155,68 +162,67 @@ void loop()
     String received = mySerial.readStringUntil('\n');
 
     Serial.println(received);
-    if (!received.indexOf("time1=")) {
+    if (!received.indexOf("time1="))
+    {
       String str = received.substring(6);
-      String part1  = splitOfstrng(str, ',', 0);
-      String part2  = splitOfstrng(str, ',', 1);
-      String part3  = splitOfstrng(str, ',', 2);
+      String part1 = splitOfstrng(str, ',', 0);
+      String part2 = splitOfstrng(str, ',', 1);
+      String part3 = splitOfstrng(str, ',', 2);
       timeStart1.hour = splitOfstrng(part1, ':', 0).toInt();
       timeStart1.min = splitOfstrng(part1, ':', 1).toInt();
-
 
       timeEnd1.hour = splitOfstrng(part2, ':', 0).toInt();
       timeEnd1.min = splitOfstrng(part2, ':', 1).toInt();
 
       Sw_togle1 = splitOfstrng(part3, ':', 0).toInt();
-
-
-    } else if (!received.indexOf("time2=")) {
+    }
+    else if (!received.indexOf("time2="))
+    {
       String str = received.substring(6);
-      String part1  = splitOfstrng(str, ',', 0);
-      String part2  = splitOfstrng(str, ',', 1);
-      String part3  = splitOfstrng(str, ',', 2);
+      String part1 = splitOfstrng(str, ',', 0);
+      String part2 = splitOfstrng(str, ',', 1);
+      String part3 = splitOfstrng(str, ',', 2);
       timeStart2.hour = splitOfstrng(part1, ':', 0).toInt();
       timeStart2.min = splitOfstrng(part1, ':', 1).toInt();
 
       timeEnd2.hour = splitOfstrng(part2, ':', 0).toInt();
       timeEnd2.min = splitOfstrng(part2, ':', 1).toInt();
       Sw_togle2 = splitOfstrng(part3, ':', 0).toInt();
-
-
-
-    }  else if (!received.indexOf("timeph1=")) {
+    }
+    else if (!received.indexOf("timeph1="))
+    {
       String str = received.substring(8);
-      String part1  = splitOfstrng(str, ',', 0);
-      String part2  = splitOfstrng(str, ',', 1);
-      String part3  = splitOfstrng(str, ',', 2);
+      String part1 = splitOfstrng(str, ',', 0);
+      String part2 = splitOfstrng(str, ',', 1);
+      String part3 = splitOfstrng(str, ',', 2);
       timePHStart1.hour = splitOfstrng(part1, ':', 0).toInt();
       timePHStart1.min = splitOfstrng(part1, ':', 1).toInt();
 
       timePHEnd1.hour = splitOfstrng(part2, ':', 0).toInt();
       timePHEnd1.min = splitOfstrng(part2, ':', 1).toInt();
       Sw_togleph1 = splitOfstrng(part3, ':', 0).toInt();
-
-
-
-    } else if (!received.indexOf("timeph2=")) {
+    }
+    else if (!received.indexOf("timeph2="))
+    {
 
       String str = received.substring(8);
-      String part1  = splitOfstrng(str, ',', 0);
-      String part2  = splitOfstrng(str, ',', 1);
-      String part3  = splitOfstrng(str, ',', 2);
+      String part1 = splitOfstrng(str, ',', 0);
+      String part2 = splitOfstrng(str, ',', 1);
+      String part3 = splitOfstrng(str, ',', 2);
       timePHStart2.hour = splitOfstrng(part1, ':', 0).toInt();
       timePHStart2.min = splitOfstrng(part1, ':', 1).toInt();
 
       timePHEnd2.hour = splitOfstrng(part2, ':', 0).toInt();
       timePHEnd2.min = splitOfstrng(part2, ':', 1).toInt();
       Sw_togleph2 = splitOfstrng(part3, ':', 0).toInt();
+    }
+    else if (!received.indexOf("timeauto="))
+    {
 
-    } else if (!received.indexOf("timeauto=")) {
-
-      String str = received.substring(8);
-      String part1  = splitOfstrng(str, ',', 0);
-      String part2  = splitOfstrng(str, ',', 1);
-      String part3  = splitOfstrng(str, ',', 2);
+      String str = received.substring(9);
+      String part1 = splitOfstrng(str, ',', 0);
+      String part2 = splitOfstrng(str, ',', 1);
+      String part3 = splitOfstrng(str, ',', 2);
 
       timeStartAuto.hour = splitOfstrng(part1, ':', 0).toInt();
       timeStartAuto.min = splitOfstrng(part1, ':', 1).toInt();
@@ -224,32 +230,37 @@ void loop()
       timeEndAuto.hour = splitOfstrng(part2, ':', 0).toInt();
       timeEndAuto.min = splitOfstrng(part2, ':', 1).toInt();
       Sw_auto = splitOfstrng(part3, ':', 0).toInt();
-
-    }  else if (!received.indexOf("setph=")) {
+    }
+    else if (!received.indexOf("setph="))
+    {
       String str = received.substring(6);
-      String part1  = splitOfstrng(str, ',', 0);
-      String part2  = splitOfstrng(str, ',', 1);
+      String part1 = splitOfstrng(str, ',', 0);
+      String part2 = splitOfstrng(str, ',', 1);
       PHstart = part1.toFloat();
       PHstop = part2.toFloat();
-
-
-    }  else if (!received.indexOf("settemp=")) {
+    }
+    else if (!received.indexOf("settemp="))
+    {
       String str = received.substring(8);
-      String part1  = splitOfstrng(str, ',', 0);
-      String part2  = splitOfstrng(str, ',', 1);
+      String part1 = splitOfstrng(str, ',', 0);
+      String part2 = splitOfstrng(str, ',', 1);
       SoilStartINT = part1.toInt();
-      SoilENDINT =  part2.toInt();
-
-    } else if (!received.indexOf("readvalue")) {
-      readValue();
-
-    } else if (!received.indexOf("swauto=")) {
-      String str = received.substring(7);
-      Sw_mode = str.toInt();
+      SoilENDINT = part2.toInt();
     }
 
+    else if (!received.indexOf("swauto="))
+    {
+      String str = received.substring(7);
 
-
+      if (!str.indexOf("true"))
+      {
+        Sw_mode = 1;
+      }
+      else if (!str.indexOf("false"))
+      {
+        Sw_mode = 0;
+      }
+    }
   }
   readKeypad();
 }
@@ -296,8 +307,6 @@ void read_time(void)
   realTime.hour = RTC.getHours();
   realTime.min = RTC.getMinutes();
   realTime.sec = RTC.getSeconds();
-
-
 }
 
 void Set_Moisture()
@@ -311,18 +320,20 @@ void Set_Moisture()
     mySerial.println((String) "Moisture=" + Moisture);
   }
 
-  if (Moisture >= SoilStartINT && Moisture <= SoilENDINT )
+  if (Moisture < SoilStartINT && Moisture <= SoilENDINT)
   {
     digitalWrite(pump1, HIGH);
     //    Serial.println("Start pump1 " );
-    mySerial.println((String) "pump1=1");
+
+    pump1_status = 1;
   }
 
-  else if ((Moisture >= SoilENDINT || Moisture <= SoilStartINT) && SoilENDINT > 0)
+  else if ((Moisture > SoilENDINT) && SoilENDINT > 0)
   {
     digitalWrite(pump1, LOW);
     Serial.println("END pump1 ");
-    mySerial.println((String) "pump1=0");
+    pump1_status = 0;
+
   }
 }
 
@@ -370,24 +381,25 @@ void Set_PH()
       {
         digitalWrite(pump2, HIGH);
         Serial.println("Start  pump2 ");
-        mySerial.println((String) "pump2=1");
+        pump2_status = 1;
       }
 
       if (PH > PHstop)
       {
         digitalWrite(pump3, HIGH);
         digitalWrite(pump4, HIGH);
-
-        mySerial.println((String) "pump3=1");
-        mySerial.println((String) "pump4=1");
+        pump3_status = 1;
+        pump4_status = 1;
       }
-      else if ((PH > PHstart && PH < PHstop && PHstart > 0 && PHstop > 0) )
+      else if ((PH > PHstart && PH < PHstop && PHstart > 0 && PHstop > 0))
       {
         Serial.println("Start pump3 + pump4 ");
         digitalWrite(pump2, 0);
         digitalWrite(pump3, 0);
         digitalWrite(pump4, 0);
-
+        pump2_status = 0;
+        pump3_status = 0;
+        pump4_status = 0;
       }
     }
   }
@@ -397,37 +409,27 @@ void Set_PH()
     digitalWrite(pump2, 0);
     digitalWrite(pump3, 0);
     digitalWrite(pump4, 0);
-
+    pump2_status = 0;
+    pump3_status = 0;
+    pump4_status = 0;
   }
 }
-void readValue() {
-  mySerial.println((String) "auto=" + timeStartAuto.hour + ":" + timeStartAuto.min + "," + timeEndAuto.hour + ":" + timeEndAuto.min );
-                   delay(200);
-                   mySerial.println((String) "time = "+timeStart1.hour+": "+timeStart1.min+", "+timeEnd1.hour+": "+timeEnd1.min+", "+timeStart2.hour+": "+timeStart2.min+", "+timeEnd2.hour+": "+timeEnd2.min);
-                   delay(200);
-                   mySerial.println((String) "timeph = "+timePHStart1.hour+": "+timePHStart1.min+", "+timePHEnd1.hour+": "+timePHEnd1.min+", "+timePHStart2.hour+": "+timePHStart2.min+", "+timePHEnd2.hour+": "+timePHEnd2.min);
-                   delay(200);
-                   mySerial.println((String) "setph = "+PHstart+", "+PHstop);
-                   delay(200);
-                   mySerial.println((String) "settemp = "+SoilStartINT+", "+SoilENDINT);
-                   delay(200);
 
-                 }
-                   String splitOfstrng(String data, char separator, int index)
-                   {
-                   int found = 0;
-                   int strIndex[] = {0, -1};
-                   int maxIndex = data.length() - 1;
+String splitOfstrng(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = {0, -1};
+  int maxIndex = data.length() - 1;
 
-                   for (int i = 0; i <= maxIndex && found <= index; i++)
-                   {
-                   if (data.charAt(i) == separator || i == maxIndex)
-                   {
-                   found++;
-                   strIndex[0] = strIndex[1] + 1;
-                   strIndex[1] = (i == maxIndex) ? i + 1 : i;
-                 }
-                 }
+  for (int i = 0; i <= maxIndex && found <= index; i++)
+  {
+    if (data.charAt(i) == separator || i == maxIndex)
+    {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = (i == maxIndex) ? i + 1 : i;
+    }
+  }
 
-                   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-                 }
+  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}

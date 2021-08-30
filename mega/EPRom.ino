@@ -61,6 +61,9 @@ void setEProm()
   address += sizeof(water_state);
   EEPROM.put(address, ph_state);
   address += sizeof(ph_state);
+
+   EEPROM.put(address, Sw_mode);
+  address += sizeof(Sw_mode);
 }
 void getEProm()
 {
@@ -123,6 +126,9 @@ void getEProm()
   address += sizeof(water_state);
   EEPROM.get(address, ph_state);
   address += sizeof(ph_state);
+
+  EEPROM.get(address, Sw_mode);
+  address += sizeof(Sw_mode);
 
   //  Serial.println((String)"time1="timeStart1.hour + ":" + timeStart1.min + "-" + timeEnd1.hour + ":" + timeEnd1.min);
   //  Serial.println((String)"time2="timeStart2.hour + ":" + timeStart2.min + "-" + timeEnd2.hour + ":" + timeEnd2.min);
